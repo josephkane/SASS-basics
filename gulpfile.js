@@ -1,73 +1,77 @@
-"use strict"
+'use strict'
 
-const gulp = require("gulp");
-const sass = require("gulp-sass");
-const jshint = require("gulp-jshint");
-const sassLint = require('gulp-sass-lint');
-const del = require("del");
+const del = require('del')
+const gulp = require('gulp')
+const jshint = require('gulp-jshint')
+const sass = require('gulp-sass')
+const sassLint = require('gulp-sass-lint')
+const runSequence = require('run-sequence')
 
-const sourcePath = "./src";
-const distributionPath = "./dist";
-const jsPath = `${sourcePath}/**/*.js`;
-const sassPath = `${sourcePath}/**/*.scss`;
-const staticPath = ["${sourcePath}/**/*", `!${sassPath}`];
+const sourcePath = './src'
+const distributionPath = './dist'
+const jsPath = `${sourcePath}/**/*.js`
+const sassPath = `${sourcePath}/**/*.scss`
+const staticPath = [`${sourcePath}/**/*`, `!${sassPath}`]
 
-gulp.task("default", ["build"]);
-gulp.task("build", ["clean", "static:copy", "sass:compile"]);
-gulp.task("watch", ["static:watch", "sass:watch", "js:watch"]);
-gulp.task("lint", ["js:lint", "sass:lint"]);
+// Utilities
 
-
-// UTILITIES
-gulp.task("clean", () => (
+gulp.task('clean', () => (
   del(`${distributionPath}/**/*`)
-));
+))
 
+// Static file Tasks
 
-// STATIC
-gulp.task("static:copy", ["clean"], () => (
-  gulp.src(["${sourcePath}/**/*", `!${sassPath}`])
+gulp.task('static:watch', () => (
+   gulp.watch(staticPath, ['build'])
+))
+
+gulp.task('static:copy', () => (
+  gulp.src(staticPath)
     .pipe(gulp.dest(distributionPath))
-));
+))
 
-gulp.task("static:watch", ["clean"], () => (
-  gulp.src(staticPath, ["static:copy"])
-));
+// JavaScript Tasks
 
+gulp.task('js:watch', () => (
+  gulp.watch(jsPath, ['js:lint'])
+))
 
-// SASS
+gulp.task('js:lint', () => (
+  gulp.src(jsPath)
+    .pipe(jshint())
+    .pipe(jshint.reporter('jshint-stylish'))
+))
 
-const sassCompile = () => {
+// Sass Tasks
+
+gulp.task('sass:compile', () => (
   gulp.src(sassPath)
     .pipe(sass())
     .pipe(gulp.dest(distributionPath))
-};
+))
 
-gulp.task("sass:watch", () => (
-	gulp.watch(sassPath,
-		["sass:lint", "sass:compile"]
-	)
-));
-
-gulp.task("sass:compileAndClean", ["clean"], sassCompile);
-
-gulp.task("sass:compile", sassCompile);
-
-gulp.task("sass:lint", () => (
+gulp.task('sass:lint', () => (
   gulp.src(sassPath)
     .pipe(sassLint())
     .pipe(sassLint.format())
     .pipe(sassLint.failOnError())
-));
+))
 
+gulp.task('sass:watch', () => (
+  gulp.watch(sassPath,
+    ['sass:lint', 'sass:compile']
+  )
+))
 
-// JS
-gulp.task("js:watch", () => (
-  gulp.watch(jsPath, ["js:lint"])
-));
+// Composed Tasks
 
-gulp.task("js:lint", () => (
-  gulp.src(jsPath)
-    .pipe(jshint())
-    .pipe(jshint.reporter("jshint-stylish"))
-));
+gulp.task('build', () => (
+  runSequence('clean', ['sass:compile', 'static:copy'])
+))
+
+gulp.task('watch',
+  runSequence(['build', 'static:watch', 'js:watch', 'sass:watch'])
+)
+
+gulp.task('lint', ['js:lint', 'sass:lint'])
+gulp.task('default', ['build'])
