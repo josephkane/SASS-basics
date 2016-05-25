@@ -1,2 +1,16 @@
 h1 {
-  color: #45ae5c; }
+  color: #e5ae5c; }
+
+.sassy {
+  color: green; }
+  .sassy li {
+    list-style: kannada; }
+    .sassy li:nth-of-type(2n) {
+      color: red; }
+
+.unsassy {
+  color: blue; }
+  .unsassy li {
+    list-style: square; }
+    .unsassy li:nth-of-type(2n) {
+      color: red; }

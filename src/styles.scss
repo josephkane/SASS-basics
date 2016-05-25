@@ -1,6 +1,26 @@
-$primary-color: #45ae5c;
+$primary-color: #e5ae5c;
 
 
 h1	{
-	color: $primary-color;
+	color: $primary-color
+}
+
+.sassy {
+	color: green;
+	li {
+		list-style: kannada;
+		&:nth-of-type(2n) {
+			color: red;
+		}
+	}
+}
+
+.unsassy {
+	color: blue;
+	li {
+		list-style: square;
+		&:nth-of-type(2n) {
+			color: red;
+		}
+	}
 }
